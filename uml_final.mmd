@@ -1,0 +1,99 @@
+classDiagram
+    %% PawPal+ Final UML Class Diagram
+    %% This reflects the actual implementation with all features
+
+    class TaskType {
+        <<enumeration>>
+        +WALK
+        +FEEDING
+        +MEDICATION
+        +GROOMING
+        +ENRICHMENT
+        +VET_VISIT
+    }
+
+    class Task {
+        -name: str
+        -task_type: TaskType
+        -duration_minutes: int
+        -priority: int
+        -frequency: str
+        -is_completed: bool
+        -scheduled_time: str
+        -due_date: date
+        -pet: Pet
+        +__init__(name, task_type, duration, priority, frequency, scheduled_time, due_date)
+        +mark_completed() void
+        +create_next_occurrence() Task
+        +can_fit_in_schedule(available_time) bool
+        +__str__() str
+    }
+
+    class Pet {
+        -name: str
+        -species: str
+        -age: int
+        -special_needs: str
+        -tasks: List~Task~
+        +__init__(name, species, age, special_needs)
+        +add_task(task) void
+        +get_tasks() List~Task~
+        +get_incomplete_tasks() List~Task~
+        +__str__() str
+    }
+
+    class Owner {
+        -name: str
+        -available_time_minutes: int
+        -preferences: Dict
+        -pets: List~Pet~
+        +__init__(name, available_time_minutes, preferences)
+        +add_pet(pet) void
+        +get_all_tasks() List~Task~
+        +get_all_incomplete_tasks() List~Task~
+        +get_available_time() int
+        +__str__() str
+    }
+
+    class Schedule {
+        -date: date
+        -tasks: List~Task~
+        -total_duration: int
+        -reasoning: str
+        +__init__(schedule_date)
+        +add_task(task) void
+        +remove_task(task) void
+        +get_total_duration() int
+        +display_plan() str
+        +get_reasoning() str
+    }
+
+    class Scheduler {
+        -owner: Owner
+        +__init__(owner)
+        +generate_plan() Schedule
+        +prioritize_tasks() List~Task~
+        +validate_constraints(schedule) bool
+        +explain_reasoning(schedule, skipped_tasks) str
+        +sort_by_time(tasks) List~Task~
+        +filter_by_status(completed) List~Task~
+        +filter_by_pet(pet_name) List~Task~
+        +filter_by_type(task_type) List~Task~
+        +detect_conflicts() List~str~
+        +get_conflicts_report() str
+    }
+
+    %% Relationships
+    Task --> TaskType : uses
+    Task --> Pet : belongs to
+    Pet "1" *-- "0..*" Task : contains
+    Owner "1" *-- "1..*" Pet : owns
+    Scheduler --> Owner : manages
+    Schedule "1" o-- "0..*" Task : schedules
+    Scheduler ..> Schedule : creates
+    Scheduler ..> Task : filters/sorts
+
+    %% Notes on key features
+    note for Task "🔄 Recurring Tasks:\n- Auto-creates next occurrence\n- Uses timedelta for dates\n- Preserves all properties"
+    note for Scheduler "🔍 Advanced Features:\n- Time-based sorting (O(n log n))\n- Multi-level filtering (O(n))\n- Conflict detection (overlap algorithm)\n- Smart prioritization"
+    note for Schedule "📅 Daily Plan:\n- Tracks total duration\n- Explains reasoning\n- Validates constraints"
